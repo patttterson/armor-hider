@@ -84,7 +84,7 @@ public final class ClientConfigManager {
                         || (MinecraftClient.getInstance().getNetworkHandler() != null && MinecraftClient.getInstance().getNetworkHandler().getServerInfo() != null)) {
                     ArmorHider.LOGGER.info("Sending to server...");
                     ClientPlayNetworking.send(new SettingsC2SPacket(get()));
-                    ArmorHider.LOGGER.info("Saved client config and sent to server. New config is {}", GSON.toJson(CURRENT));
+                    ArmorHider.LOGGER.info("Send client config package to server.");
                 }
             }
         } catch (IOException e) {
@@ -95,7 +95,7 @@ public final class ClientConfigManager {
     public static Map<String, PlayerConfig> getServerConfig(){ return serverHashMap; }
     
     public static void setServerConfig(List<PlayerConfig> serverConfig) {
-        ArmorHider.LOGGER.info("Setting server config to {}", GSON.toJson(serverConfig));
+        ArmorHider.LOGGER.info("Setting server config...");
         serverHashMap = new HashMap<>();
         serverConfig.forEach(c -> {
             serverHashMap.put(c.playerName, c);
@@ -118,7 +118,7 @@ public final class ClientConfigManager {
                 serverHashMap.put(playerName, CURRENT);
                 return CURRENT;
             }
-            ArmorHider.LOGGER.warn("Failed to get config for player by id, trying by name. {} {}", playerName, playerName);
+            ArmorHider.LOGGER.warn("Failed to get config for player by id, trying to retrieve by player name. {} {}", playerName, playerName);
             var nameBasedConfig = serverHashMap.values().stream().filter(c -> c.playerName.equals(playerName)).findFirst();
             if (nameBasedConfig.isPresent()) {
                 ArmorHider.LOGGER.info("Found config for player by name {}, returning config", playerName);

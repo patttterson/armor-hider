@@ -1,3 +1,9 @@
+// | --------------------------------------------------- |
+// | This logic is inspired by Show Me Your Skin!        |
+// | The source for this mod is to be found on:          |
+// | https://github.com/enjarai/show-me-your-skin        |
+// | --------------------------------------------------- |
+
 package de.zannagh.armorhider.mixin.client;
 
 import de.zannagh.armorhider.client.ArmorHiderClient;
