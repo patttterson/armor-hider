@@ -48,7 +48,7 @@ public abstract class SkinOptionsMixin {
 
         SimpleOption<Double> helmetOption = new SimpleOption<>(
                 "armorhider.helmet.transparency",
-                SimpleOption.constantTooltip(Text.literal("Adjusts the helmet transparency for your model between 0 and 1 in steps of 0.05.")),
+                SimpleOption.constantTooltip(Text.literal("Adjusts the helmet transparency for your model between 0 and 1 in steps of 0.05. Applies to skulls and hats as well.")),
                 (text, value) -> Text.literal("Helmet: " + String.format("%.0f%%", value * 100)),
                 new SimpleOption.ValidatingIntSliderCallbacks(0, 20)
                         .withModifier(v -> v / 20.0, v -> (int) Math.round(v * 20)),
@@ -60,7 +60,7 @@ public abstract class SkinOptionsMixin {
 
         SimpleOption<Double> chestOption = new SimpleOption<>(
                 "armorhider.chest.transparency",
-                SimpleOption.constantTooltip(Text.literal("Adjusts the chestplate transparency for your model between 0 and 1 in steps of 0.05.")),
+                SimpleOption.constantTooltip(Text.literal("Adjusts the chestplate transparency for your model between 0 and 1 in steps of 0.05. Applies to elytra as well.")),
                 (text, value) -> Text.literal("Chestplate: " + String.format("%.0f%%", value * 100)),
                 new SimpleOption.ValidatingIntSliderCallbacks(0, 20)
                         .withModifier(v -> v / 20.0, v -> (int) Math.round(v * 20)),

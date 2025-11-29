@@ -4,7 +4,7 @@
 // | https://github.com/enjarai/show-me-your-skin        |
 // | --------------------------------------------------- |
 
-package de.zannagh.armorhider.mixin.client;
+package de.zannagh.armorhider.mixin.client.bodyKneesAndToes;
 
 import de.zannagh.armorhider.client.ArmorHiderClient;
 import net.minecraft.client.render.command.OrderedRenderCommandQueue;

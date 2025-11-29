@@ -8,6 +8,7 @@ import de.zannagh.armorhider.resources.ArmorModificationInfo;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.entity.EquipmentSlot;
 
@@ -15,6 +16,18 @@ public class ArmorHiderClient implements ClientModInitializer {
     
     public static ThreadLocal<EquipmentSlot> CurrentSlot =  ThreadLocal.withInitial(() -> null);
     public static ThreadLocal<ArmorModificationInfo> CurrentArmorMod = ThreadLocal.withInitial(() -> null);
+    
+    public static void trySetCurrentSlotFromEntityRenderState(LivingEntityRenderState livingEntityRenderState){
+        if (livingEntityRenderState == null) {
+            return;
+        }
+        
+        if (livingEntityRenderState instanceof PlayerEntityRenderState playerEntityRenderState
+                && ArmorHiderClient.CurrentSlot.get() != null) {
+            var configByEntityState = tryResolveConfigFromPlayerEntityState(ArmorHiderClient.CurrentSlot.get(), playerEntityRenderState);
+            ArmorHiderClient.CurrentArmorMod.set(configByEntityState);
+        }
+    }
     
     @Override
 	public void onInitializeClient() {

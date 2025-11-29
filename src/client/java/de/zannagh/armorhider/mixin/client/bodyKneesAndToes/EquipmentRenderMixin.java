@@ -4,7 +4,7 @@
 // | https://github.com/enjarai/show-me-your-skin        |
 // | --------------------------------------------------- |
 
-package de.zannagh.armorhider.mixin.client;
+package de.zannagh.armorhider.mixin.client.bodyKneesAndToes;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -18,6 +18,7 @@ import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.command.RenderCommandQueue;
 import net.minecraft.client.render.entity.equipment.EquipmentModel;
 import net.minecraft.client.render.entity.equipment.EquipmentRenderer;
+import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.math.MatrixStack;
@@ -40,11 +41,8 @@ public class EquipmentRenderMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private static <S, T> void interceptRender(EquipmentModel.LayerType layerType, RegistryKey<EquipmentAsset> assetKey, Model<? super S> model, S object, ItemStack itemStack, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, int i, Identifier identifier, int j, int k, CallbackInfo ci){
-        if (object instanceof PlayerEntityRenderState playerEntityRenderState && ArmorHiderClient.CurrentSlot.get() != null) {
-            var configByEntityState = tryResolveConfigFromPlayerEntityState(ArmorHiderClient.CurrentSlot.get(), playerEntityRenderState);
-            ArmorHiderClient.CurrentArmorMod.set(configByEntityState);
-        }
+    private static <S> void interceptRender(EquipmentModel.LayerType layerType, RegistryKey<EquipmentAsset> assetKey, Model<? super S> model, S object, ItemStack itemStack, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, int i, Identifier identifier, int j, int k, CallbackInfo ci){
+        ArmorHiderClient.trySetCurrentSlotFromEntityRenderState((LivingEntityRenderState) object);
         
         if (ArmorHiderClient.CurrentArmorMod.get() == null) {
             return;
@@ -55,7 +53,9 @@ public class EquipmentRenderMixin {
         }
         
         if (ArmorHiderClient.CurrentArmorMod.get().ShouldHide()) {
-            ci.cancel();
+            if (ci != null) {
+                ci.cancel();
+            }
         }
     }
 
