@@ -4,6 +4,20 @@ branches:
     increment: None
     label: ''
     source-branches: []
+    is-release-branch: false
+    is-main-branch: true
+    pre-release-weight: 0
+    prevent-increment:
+      when-current-commit-tagged: true
+  release:
+    mode: ContinuousDelivery
+    increment: None
+    label: ''
+    regex: ^release/*
+    source-branches: 
+      - main
+    is-release-branch: true
+    is-main-branch: false
     pre-release-weight: 0
     prevent-increment:
       when-current-commit-tagged: true
