@@ -3,18 +3,27 @@ plugins {
 	id 'maven-publish'
 }
 
-def getGitVersion() {
-    String ciVersionProperty = findProperty("semVer") ?: ""
-    if (ciVersionProperty != "") {
-        // In CI, this property is set to versionize
-        String ciVersion = "git rev-parse --abbrev-ref HEAD".execute().text.split('/').last().trim() + "-" + ciVersionProperty
-        ciVersion = ciVersion.replace("--", "-")
-        return ciVersion
-    }
-    String branchName = "git rev-parse --abbrev-ref HEAD".execute().text.split('/').last().trim()
-    String lastKnownTag = "git describe --tags".execute().text.trim()
-    String version = branchName + "-" + lastKnownTag
-    return version
+String getGitVersion() {
+	Boolean isPreRelease = true
+	String preReleaseProperty = findProperty("prerelease") ?: ""
+	if (!preReleaseProperty.isEmpty() && preReleaseProperty.toLowerCase() == "false") {
+		isPreRelease = false
+	}
+	String ciVersionProperty = findProperty("semVer") ?: ""
+	String modLoader = findProperty("mod_loader")
+	String gameVersion = findProperty("minecraft_version")
+	
+	String buildVersion
+	if (ciVersionProperty != "") {
+		// In CI, this property is set to versionize
+		String ciVersion = gameVersion + "-" + ciVersionProperty
+		buildVersion = modLoader + "-" + ciVersion
+	}
+	else {
+		buildVersion = modLoader + "-" + getVersionFromGitVersionOrTag(gameVersion)
+	}
+	
+	return isPreRelease ? buildVersion + "-preview" : buildVersion
 }
 
 version = getGitVersion()
@@ -101,5 +110,46 @@ publishing {
 		// Notice: This block does NOT have the same function as the block in the top level.
 		// The repositories here will be used for publishing your artifact, not for
 		// retrieving dependencies.
+	}
+}
+
+static String getVersionFromGitVersionOrTag(String gameVersion){
+	String semVer
+	String commitsSinceSource
+	String uncommittedChanges
+	try {
+		try{
+			semVer = "gitversion /output json /showVariable majorMinorPatch".execute().text.trim().replace("\n", "").replace("\r", "")
+			commitsSinceSource = "gitversion /output json /showVariable CommitsSinceVersionSource".execute().text.trim().replace("\n", "").replace("\r", "")
+			uncommittedChanges = "gitversion /output json /showVariable UncommittedChanges".execute().text.trim().replace("\n", "").replace("\r", "")
+		} catch (ignored) {
+			semVer = "dotnet gitversion /output json /showVariable majorMinorPatch".execute().text.trim().replace("\n", "").replace("\r", "")
+			commitsSinceSource = "dotnet gitversion /output json /showVariable CommitsSinceVersionSource".execute().text.trim().replace("\n", "").replace("\r", "")
+			uncommittedChanges = "dotnet gitversion /output json /showVariable UncommittedChanges".execute().text.trim().replace("\n", "").replace("\r", "")
+		}
+		if (semVer.isEmpty() || !semVer.matches(".*\\d.*") || !commitsSinceSource.matches("\\d.*")){
+			throw new Exception()
+		}
+		if (commitsSinceSource == "0" && uncommittedChanges == "0")
+		{
+			return gameVersion + "-" + semVer
+		}
+		else if (commitsSinceSource == "0" && uncommittedChanges != "0"){
+			return gameVersion + "-" + semVer + "-" + uncommittedChanges
+		}
+		else {
+			return gameVersion + "-" + semVer + "-" + commitsSinceSource
+		}
+	}
+	catch (ignored) {
+		String lastKnownTag = "git describe --tags".execute().text.trim()
+		String version
+		if (lastKnownTag.contains(gameVersion)) {
+			version = lastKnownTag
+		}
+		else {
+			version = gameVersion + "-" + lastKnownTag
+		}
+		return version
 	}
 }
