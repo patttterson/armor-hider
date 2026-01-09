@@ -6,9 +6,8 @@
 
 package de.zannagh.armorhider.mixin.client;
 
+import de.zannagh.armorhider.client.ArmorHiderClient;
 import de.zannagh.armorhider.common.CombatManager;
-import de.zannagh.armorhider.config.ClientConfigManager;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.LivingEntity;
@@ -63,6 +62,7 @@ public class LivingEntityMixin {
      * Logic:
      * - If server has combat detection enabled: always log combat (ignore player preference)
      * - If server has combat detection disabled: use the player's individual preference
+     * - If server config is not available (mod not on server/older version): use player preference
      *
      * @param player The player entity to check.
      * @return true if combat should be logged for this player
@@ -70,20 +70,25 @@ public class LivingEntityMixin {
     @Unique
     private static boolean shouldLogCombatForPlayer(PlayerEntity player) {
         boolean isClientPlayer = !(player instanceof OtherClientPlayerEntity);
-        boolean serverUsesCombatDetection = ClientConfigManager.getServerConfig().enableCombatDetection;
+
+        // Null safety: Check if server config and serverWideSettings are available
+        var serverConfig = ArmorHiderClient.CLIENT_CONFIG_MANAGER.getServerConfig();
+        boolean serverUsesCombatDetection = serverConfig != null
+                && serverConfig.serverWideSettings != null
+                && serverConfig.serverWideSettings.enableCombatDetection.getValue();
 
         // If server enforces combat detection, always log combat (potential PvP advantage prevention)
         if (serverUsesCombatDetection) {
             return true;
         }
 
-        // Server has combat detection disabled - use individual player preference
+        // Server has combat detection disabled or not configured - use individual player preference
         boolean playerUsesCombatDetection;
         if (isClientPlayer) {
-            playerUsesCombatDetection = ClientConfigManager.get().enableCombatDetection;
+            playerUsesCombatDetection = ArmorHiderClient.CLIENT_CONFIG_MANAGER.getValue().enableCombatDetection.getValue();
         } else {
-            var playerConfig = ClientConfigManager.getServerConfig().getPlayerConfigOrDefault(player);
-            playerUsesCombatDetection = playerConfig != null ? playerConfig.enableCombatDetection : true;
+            var playerConfig = serverConfig != null ? serverConfig.getPlayerConfigOrDefault(player) : null;
+            playerUsesCombatDetection = playerConfig != null ? playerConfig.enableCombatDetection.getValue() : true;
         }
 
         return playerUsesCombatDetection;

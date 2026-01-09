@@ -61,7 +61,7 @@ public class OptionElementFactory {
                 new NarratedTooltipFactory<>(tooltip, narration),
                 (text, value) -> sliderTextProvider.apply(value),
                 new SimpleOption.ValidatingIntSliderCallbacks(0, 20)
-                        .withModifier(v -> v / 20.0, v -> (int) Math.round(v * 20)),
+                        .withModifier(v -> v / 20.0, v -> (int) Math.round(v * 20), true),
                 defaultValue,
                 setter
         );

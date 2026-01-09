@@ -1,9 +1,10 @@
 package de.zannagh.armorhider.rendering;
 
+import de.zannagh.armorhider.client.ArmorHiderClient;
 import de.zannagh.armorhider.common.ItemStackHelper;
-import de.zannagh.armorhider.config.ClientConfigManager;
 import de.zannagh.armorhider.resources.ArmorModificationInfo;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.client.render.entity.state.PlayerEntityRenderState;
 import net.minecraft.entity.EquipmentSlot;
@@ -65,8 +66,8 @@ public class ArmorRenderPipeline {
 
     private static ArmorModificationInfo tryResolveConfigFromPlayerEntityState(EquipmentSlot slot, PlayerEntityRenderState state){
         return state.displayName == null
-                ? new ArmorModificationInfo(slot, ClientConfigManager.get())
-                : new ArmorModificationInfo(slot, ClientConfigManager.getConfigForPlayer(state.displayName.getString()));
+                ? new ArmorModificationInfo(slot, ArmorHiderClient.CLIENT_CONFIG_MANAGER.getValue())
+                : new ArmorModificationInfo(slot, ArmorHiderClient.CLIENT_CONFIG_MANAGER.getConfigForPlayer(state.displayName.getString()));
     }
 
     private static void setCurrentSlot(EquipmentSlot slot) {
@@ -77,7 +78,7 @@ public class ArmorRenderPipeline {
         return ArmorModificationContext.getCurrentSlot();
     }
 
-    private static ArmorModificationInfo getCurrentModification() {
+    public static ArmorModificationInfo getCurrentModification() {
         return ArmorModificationContext.getCurrentModification();
     }
 
@@ -114,7 +115,7 @@ public class ArmorRenderPipeline {
         double transparency = modification.GetTransparency();
 
         if (transparency < 0.95) {
-            return RenderLayer.getEntityTranslucent(texture);
+            return RenderLayers.entityTranslucent(texture);
         }
 
         return originalLayer;
@@ -127,7 +128,7 @@ public class ArmorRenderPipeline {
         }
 
         if (modification.GetTransparency() < 1) {
-            return RenderLayer.createArmorTranslucent(net.minecraft.client.render.TexturedRenderLayers.ARMOR_TRIMS_ATLAS_TEXTURE);
+            return RenderLayers.armorTranslucent(net.minecraft.client.render.TexturedRenderLayers.ARMOR_TRIMS_ATLAS_TEXTURE);
         }
 
         return originalLayer;
